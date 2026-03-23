@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Cubo 3D - 27 Cubinhos Brancos com Contorno Cinza</title>
+<style>
+body {
+margin: 0;
+overflow: hidden;
+font-family: 'Arial', sans-serif;
+}
+#info {
+position: absolute;
+top: 20px;
+left: 20px;
+color: white;
+background: rgba(0,0,0,0.6);
+padding: 8px 16px;
+border-radius: 6px;
+pointer-events: none;
+z-index: 10;
+font-size: 14px;
+}
+#controls-note {
+position: absolute;
+bottom: 20px;
+left: 20px;
+color: white;
+background: rgba(0,0,0,0.5);
+padding: 5px 12px;
+border-radius: 6px;
+font-size: 12px;
+pointer-events: none;
+font-family: monospace;
+z-index: 10;
+}
+@media (max-width: 768px) {
+#info { font-size: 10px; top: 10px; left: 10px; }
+#controls-note { font-size: 8px; }
+}
+</style>
+</head>
+<body>
+<div id="info">
+<strong>⬜ Cubo 3D</strong> | 27 cubinhos brancos | Contorno cinza
+</div>
+<div id="controls-note">
+🖱️ Arraste para girar | Clique direito + arraste para zoom
+</div>
+
+<script type="importmap">
+{
+"imports": {
+"three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+"three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+}
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// --- Configuração da cena com névoa de profundidade ---
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x111111); // Fundo cinza escuro
+scene.fog = new THREE.FogExp2(0x111111, 0.03); // Névoa suave
+
+// --- Configuração da câmera ---
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(5, 4, 6);
+camera.lookAt(0, 0, 0);
+
+// --- Renderer ---
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// --- Controles orbitais (interação) ---
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.rotateSpeed = 1.5;
+controls.zoomSpeed = 1.2;
+controls.enableZoom = true;
+controls.enablePan = true;
+controls.target.set(0, 0, 0);
+// --- Luz ambiente básica ---
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+scene.add(ambientLight);
+// --- Criação do cubo com 27 cubinhos brancos e contorno cinza ---
+const cubeSize = 0.92;
+const gap = 0.08;
+const step = cubeSize + gap;
+const offsets = [-1, 0, 1];
+// Material branco puro para os cubos
+const material = new THREE.MeshStandardMaterial({
+color: 0xffffff,
+roughness: 0.5,
+metalness: 0,
+emissive: 0x000000
+});
+// Material para o contorno em cinza
+const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x888888 }); // Cinza médio
+// Loop para criar os 27 cubinhos com seus respectivos contornos
+for (let i of offsets) {
+for (let j of offsets) {
+for (let k of offsets) {
+const posX = i * step;
+const posY = j * step;
+const posZ = k * step;
+// Criar o cubo
+const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+const cube = new THREE.Mesh(geometry, material);
+cube.position.set(posX, posY, posZ);
+scene.add(cube);
+// Criar o contorno cinza (arestas) para este cubo
+const edgesGeo = new THREE.EdgesGeometry(geometry);
+const edges = new THREE.LineSegments(edgesGeo, edgeMaterial);
+edges.position.copy(cube.position);
+scene.add(edges);
+}
+}
+}
+// --- Função de animação ---
+function animate() {
+requestAnimationFrame(animate);
+controls.update();
+renderer.render(scene, camera);
+}
+animate();
+// --- Ajuste responsivo ---
+window.addEventListener('resize', onWindowResize, false);
+function onWindowResize() {
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
+}
+console.log('Cubo branco com 27 cubinhos e contorno cinza carregado!');
+</script>
+</body>
+</html>
+
+
+
